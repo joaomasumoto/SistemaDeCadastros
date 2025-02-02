@@ -1,10 +1,7 @@
 package application;
-
 import entities.User;
+import util.FileManager;
 import util.Validator;
-
-import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,20 +9,16 @@ public class Program {
     public static void main(String[] args) {
 
         String path = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\formulario.txt";
-        List<String> perguntas = new ArrayList<>();
+        List<String> perguntas = FileManager.readFileLines(path);
 
-        // Carregar as perguntas do formulario
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(path))) {
-            String linha = bufferedReader.readLine();
-            while (linha != null) {
-                perguntas.add(linha.substring(4)); // Remove os numeros e o " - "
-                linha = bufferedReader.readLine();
+        // Evita erro caso formulario.txt esteja mal formatado
+        for (int i = 0; i < perguntas.size(); i++) {
+            if (perguntas.get(i).length() > 4) {
+                perguntas.set(i, perguntas.get(i).substring(4)); // Remove "1 - ", "2 - ", etc.
             }
-        } catch (IOException e) {
-            System.out.println("Error: " + e.getMessage());
         }
 
-        // Instancia das variaveis temporarias
+        // Instancia das variáveis temporárias
         String name = null;
         String email = null;
         int age = 0;
@@ -35,8 +28,7 @@ public class Program {
         // Scanner para receber as respostas
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Preencha o perfil de cadastro de usuário: ");
-
+        System.out.println("Preencha o perfil de cadastro de usuário:");
 
         for (int i = 0; i < perguntas.size(); i++) {
             boolean valido = false;
@@ -82,51 +74,12 @@ public class Program {
 
         // Criar objeto `User`
         User user1 = new User(name, email, age, height);
-        saveUserFile(user1);
 
-        // Ler documento criado
-        readUserFile(user1.getName());
+        // Obtém o número sequencial e salva o usuário no arquivo
+        int sequence = FileManager.getSequence();
+        FileManager.saveUserToFile(user1, sequence);
 
-
+        // Ler e exibir o conteúdo do usuário salvo
+        FileManager.readUserFromFile(sequence, user1.getName());
     }
-
-    //criacao arquivo funcionario
-
-    private static int sequence = 1;
-
-    public static void saveUserFile(User user) {
-        // Criar nome do arquivo
-        String fileName = String.format("%d-%s.TXT", sequence, user.getName().toUpperCase().replace(" ", ""));
-        String filePath = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\" + fileName;
-
-        //Escrever dados no arquivo
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))){
-            writer.write(user.toString());
-            System.out.println("Usuário salvo no arquivo: " + fileName);
-        } catch (IOException e) {
-            System.out.println("Erro ao salvar o usuário no arquivo: " + e.getMessage());
-        }
-
-        sequence++;
-
-    }
-
-    public static void readUserFile(String userName) {
-        // Gerar o nome do arquivo baseado no nome do usuário (sem espaços e em maiúsculas)
-        String fileName = String.format("%d-%s.TXT", sequence-1, userName.toUpperCase().replace(" ", ""));
-        String filePath = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\" + fileName;
-
-        //Abrir e ler o conteúdo
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            System.out.println("\nDados do usuário no arquivo " + fileName + ":");
-            while ((line = reader.readLine()) !=null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            System.out.println("Erro ao ler o arquivo: " + e.getMessage());
-        }
-
-    }
-
 }
