@@ -3,9 +3,7 @@ package application;
 import entities.User;
 import util.Validator;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -84,10 +82,51 @@ public class Program {
 
         // Criar objeto `User`
         User user1 = new User(name, email, age, height);
+        saveUserFile(user1);
 
-        // Exibir cadastro do 'User'
-        System.out.println(user1);
+        // Ler documento criado
+        readUserFile(user1.getName());
 
 
     }
+
+    //criacao arquivo funcionario
+
+    private static int sequence = 1;
+
+    public static void saveUserFile(User user) {
+        // Criar nome do arquivo
+        String fileName = String.format("%d-%s.TXT", sequence, user.getName().toUpperCase().replace(" ", ""));
+        String filePath = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\" + fileName;
+
+        //Escrever dados no arquivo
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))){
+            writer.write(user.toString());
+            System.out.println("Usuário salvo no arquivo: " + fileName);
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar o usuário no arquivo: " + e.getMessage());
+        }
+
+        sequence++;
+
+    }
+
+    public static void readUserFile(String userName) {
+        // Gerar o nome do arquivo baseado no nome do usuário (sem espaços e em maiúsculas)
+        String fileName = String.format("%d-%s.TXT", sequence-1, userName.toUpperCase().replace(" ", ""));
+        String filePath = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\" + fileName;
+
+        //Abrir e ler o conteúdo
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            System.out.println("\nDados do usuário no arquivo " + fileName + ":");
+            while ((line = reader.readLine()) !=null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+        }
+
+    }
+
 }
