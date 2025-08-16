@@ -6,7 +6,20 @@ import java.util.List;
 
 public class FileManager {
     private static final String DIRECTORY_PATH = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\";
-    private static final String SEQUENCE_FILE = DIRECTORY_PATH + "sequence.txt";
+    private static final String DATA_DIR = DIRECTORY_PATH + "data" + File.separator;
+    private static final String SEQUENCE_FILE = DATA_DIR + "sequence.txt";
+
+    static {
+        ensureDirectoryExists(DATA_DIR);
+        ensureDirectoryExists(DIRECTORY_PATH);
+    }
+
+    private static void ensureDirectoryExists(String dirPath) {
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
 
     public static void saveUserToFile(User user, int sequence) {
         // Criar o nome do arquivo no formato "1-NOME.TXT"
