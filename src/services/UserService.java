@@ -4,8 +4,11 @@ import entities.User;
 import util.FileManager;
 import util.Validator;
 
+import java.io.File;
 import java.util.List;
 import java.util.Scanner;
+
+import static util.Validator.ensureEmailNotUsed;
 
 public class UserService {
     private static final Scanner sc = new Scanner(System.in);
@@ -14,6 +17,8 @@ public class UserService {
 
         String path = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\formulario.txt";
         List<String> perguntas = FileManager.readFileLines(path);
+
+        String usersDir = FileManager.getUsersDirectory();
 
         // Evita erro caso formulario.txt esteja mal formatado
         for (int i = 0; i < perguntas.size(); i++) {
@@ -48,8 +53,10 @@ public class UserService {
                         }
 
                         case 1 -> {
+
                             if (Validator.isEmailValid(input)) {
                                 email = input.trim();
+                                ensureEmailNotUsed(usersDir, email);
                                 valido = true;
                             }
                         }

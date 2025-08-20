@@ -1,5 +1,9 @@
 package util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +28,33 @@ public class Validator {
         }
         return emailMatcher.matches();
 
+    }
+
+    public static void ensureEmailNotUsed(String dirPath, String email) {
+        File dir = new File(dirPath);
+        File[] archives = dir.listFiles();
+        if (archives == null) return; // nada pra checar
+
+        String target = email.trim().toLowerCase();
+
+        for (File f  : archives) {
+            if (f.isDirectory()) continue;
+
+            String name = f.getName().toLowerCase();
+
+            if (name.equals("formulario.txt") || name.endsWith("sequence.txt")) continue;
+
+            try (BufferedReader br = new BufferedReader((new FileReader(f)))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.toLowerCase().contains(target)) { // Utilizar 'contains' pois User registra os dados em uma linha só, entao os emails se comparados com .equals nunca vao apontar duplicidade!
+                        throw new IllegalArgumentException("Email já consta na base.");
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 

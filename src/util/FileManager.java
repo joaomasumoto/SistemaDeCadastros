@@ -9,6 +9,8 @@ public class FileManager {
     private static final String DATA_DIR = DIRECTORY_PATH + "data" + File.separator;
     private static final String SEQUENCE_FILE = DATA_DIR + "sequence.txt";
 
+    public static String getUsersDirectory() { return DIRECTORY_PATH; }
+
     static {
         ensureDirectoryExists(DATA_DIR);
         ensureDirectoryExists(DIRECTORY_PATH);
