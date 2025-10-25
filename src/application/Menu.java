@@ -1,6 +1,7 @@
 package application;
 
 import services.UserService;
+import util.FileManager;
 
 import java.util.Scanner;
 
@@ -27,10 +28,8 @@ public class Menu {
                 switch (opcao) {
                     case 1 -> UserService.cadastrarUsuario();
 
-                    case 2 -> {
+                    case 2 -> UserService.listarUsuarios();
 
-
-                    }
 
                     case 3 -> {
 

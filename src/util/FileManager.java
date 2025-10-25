@@ -91,7 +91,6 @@ public class FileManager {
         }
     }
 
-
     private static void updateSequence(int newSequence) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(SEQUENCE_FILE, false))) {
             writer.write(String.valueOf(newSequence));
@@ -101,5 +100,21 @@ public class FileManager {
         }
     }
 
+    public static List<File> listUserFiles() {
+        List<File> userList = new ArrayList<>();
+        File pasta = new File(DIRECTORY_PATH);
+        File[] users = pasta.listFiles();
 
+        if (users != null) {
+            for (File f : users) {
+                String name = f.getName().toLowerCase();
+                if (name.equals("formulario.txt") || name.endsWith("sequence.txt")) {
+                    continue;
+                }
+
+                if (f.isFile()) userList.add(f);
+                }
+            }
+        return userList;
+    }
 }

@@ -4,7 +4,11 @@ import entities.User;
 import util.FileManager;
 import util.Validator;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -89,4 +93,33 @@ public class UserService {
         // Ler e exibir o conteúdo do usuário salvo
         FileManager.readUserFromFile(sequence, user1.getName());
     }
+
+    public static void listarUsuarios() {
+        List<File> usuarios = FileManager.listUserFiles();
+        List<String> nomes = new ArrayList<>();
+
+        if (usuarios.isEmpty()) {
+            System.out.println("Nenhum usuário cadastrado.");
+            return;
+        }
+
+        int indice = 1;
+        for (File f : usuarios) {
+
+            try (BufferedReader br = new BufferedReader(new FileReader(f))){
+                String line = br.readLine();
+
+                if (line.trim().toLowerCase().startsWith("nome:")) {
+                    nomes.add(indice + " - " + line.split(":", 2) [1].trim());
+                    indice++;
+                }
+            } catch (IOException e) {
+                System.err.println("Erro ao ler arquivo: " + f.getName());            }
+        }
+
+        for (String nome : nomes) {
+            System.out.println(nome);
+        }
+    }
+
 }
