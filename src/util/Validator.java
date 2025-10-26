@@ -12,6 +12,19 @@ public class Validator {
 
     // Validações
 
+    public static boolean isQuestionValid(String question) {
+        if ( question == null || question.isBlank()) {
+            throw new IllegalArgumentException("Pergunta não pode ser nula.");
+        }
+
+        Matcher questionMatcher = questionPattern.matcher(question.trim());
+
+        if (!questionMatcher.matches()) {
+            throw new IllegalArgumentException("Insira uma pergunta válida.");
+        }
+        return true;
+    }
+
     public static boolean isNameValid(String name) {
         Matcher nameMatcher = namePatttern.matcher(name.trim());
         if (!nameMatcher.matches()) {
@@ -37,7 +50,7 @@ public class Validator {
 
         String target = email.trim().toLowerCase();
 
-        for (File f  : archives) {
+        for (File f : archives) {
             if (f.isDirectory()) continue;
 
             String name = f.getName().toLowerCase();
@@ -84,6 +97,31 @@ public class Validator {
         return sb.toString().trim();
     }
 
+    public static String formatQuestion(String question) {
+        if (question == null) return "";
+
+        // Limpa espaços extras
+        question = question.trim().replaceAll("\\s+", " ");
+
+        //Letra inicial maiúscula
+        if (!question.isBlank()) {
+            question = question.substring(0, 1).toUpperCase() + question.substring(1).toLowerCase();
+        }
+
+        // Remover interrogações duplicadas
+        question = question.replaceAll("\\?{2,}", "?");
+
+        // Substituir pontos finais por interrogação
+        question = question.replaceAll("\\.+$", "?");
+
+        // Garantir que termina com '?'
+        if (!question.endsWith("?")) {
+            question += "?";
+        }
+
+        return question;
+    }
+
     // Metodos auxiliares regex name
 
     private static final String NAME_PATTERN = "^[A-Za-zÀ-ÖØ-öø-ÿ]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'-]+)+$";
@@ -96,5 +134,17 @@ public class Validator {
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
     private static final Pattern emailPattern = Pattern.compile(EMAIL_PATTERN);
+
+    // Metodos auxiliares regex question
+        // Regras:
+            // ^ e $ → âncoras de início e fim da string (garantem que a validação abranja a frase inteira).
+            // (?=.*[A-Za-zÀ-ÿ]) → exige que exista pelo menos uma letra (evita entradas só com números ou símbolos).
+            // [A-Za-zÀ-ÿ0-9\\s,\\.!\\?] → permite letras (com acento), números, espaços e pontuações simples (, . ! ?).
+            // {5,120} → tamanho mínimo de 5 e máximo de 120 caracteres.
+    private static final String QUESTION_PATTERN =
+            "^(?=.*[A-Za-zÀ-ÿ])[A-Za-zÀ-ÿ0-9\\s,\\.!\\?]{5,120}$";
+
+    private static final Pattern questionPattern = Pattern.compile(QUESTION_PATTERN);
+
 
 }

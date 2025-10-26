@@ -1,15 +1,23 @@
 package util;
+
 import entities.User;
+
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class FileManager {
     private static final String DIRECTORY_PATH = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\";
     private static final String DATA_DIR = DIRECTORY_PATH + "data" + File.separator;
     private static final String SEQUENCE_FILE = DATA_DIR + "sequence.txt";
+    private static final String FORMS_FILE = DIRECTORY_PATH + "formulario.txt";
 
-    public static String getUsersDirectory() { return DIRECTORY_PATH; }
+    public static String getUsersDirectory() {
+        return DIRECTORY_PATH;
+    }
 
     static {
         ensureDirectoryExists(DATA_DIR);
@@ -113,8 +121,42 @@ public class FileManager {
                 }
 
                 if (f.isFile()) userList.add(f);
-                }
             }
+        }
+
+        userList.sort(Comparator.comparingInt(f -> {
+            String fileName = f.getName().split("-", 2)[0];
+            try {
+                return Integer.parseInt(fileName);
+            } catch (NumberFormatException e) {
+                return Integer.MAX_VALUE;
+            }
+
+        }));
+
         return userList;
     }
+
+    private static int getQuestionCount() {
+        int contador = 0;
+        try {
+            List<String> allQuestions = Files.readAllLines(Paths.get(FORMS_FILE));
+            contador = allQuestions.size();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contador;
+    }
+
+    public static void addQuestion(String question) {
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FORMS_FILE, true))) {
+            bw.newLine();
+            bw.write((getQuestionCount() + 1) + " - " + Validator.formatQuestion(question));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

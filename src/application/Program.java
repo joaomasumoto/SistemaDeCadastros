@@ -5,6 +5,5 @@ public class Program {
 
     Menu.exibirMenu();
 
-
     }
 }

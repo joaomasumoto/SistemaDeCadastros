@@ -8,11 +8,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import static util.Validator.ensureEmailNotUsed;
+import static util.Validator.isQuestionValid;
 
 public class UserService {
     private static final Scanner sc = new Scanner(System.in);
@@ -37,6 +36,7 @@ public class UserService {
         int age = 0;
         double height = 0.0;
         String input;
+        Map<String, String> extras = new HashMap<>();
 
         System.out.println("Preencha o perfil de cadastro de usuário:");
 
@@ -73,6 +73,10 @@ public class UserService {
                             height = Double.parseDouble(input.trim().replace(",", "."));
                             valido = true;
                         }
+                        default -> {
+                            extras.put(perguntas.get(i), input);
+                            valido = true;
+                        }
 
                     }
                 } catch (IllegalArgumentException e) {
@@ -84,7 +88,7 @@ public class UserService {
         System.out.println("\nCadastro concluído com sucesso!");
 
         // Criar objeto `User`
-        User user1 = new User(name, email, age, height);
+        User user1 = new User(name, email, age, height, extras);
 
         // Obtém o número sequencial e salva o usuário no arquivo
         int sequence = FileManager.getSequence();
@@ -120,6 +124,17 @@ public class UserService {
         for (String nome : nomes) {
             System.out.println(nome);
         }
+    }
+
+    public static void adicionarPergunta() {
+        System.out.print("Pergunta a ser adicionada no formulário: ");
+        String pergunta = sc.nextLine();
+        if (!isQuestionValid(pergunta)){
+            return;
+        }
+
+        FileManager.addQuestion(pergunta);
+        System.out.println("Pergunta adicionada com sucesso!");
     }
 
 }

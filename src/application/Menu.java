@@ -31,10 +31,7 @@ public class Menu {
                     case 2 -> UserService.listarUsuarios();
 
 
-                    case 3 -> {
-
-
-                    }
+                    case 3 -> UserService.adicionarPergunta();
 
                     case 4 -> {
 
