@@ -30,15 +30,11 @@ public class Menu {
 
                     case 2 -> UserService.listarUsuarios();
 
-
                     case 3 -> UserService.adicionarPergunta();
 
                     case 4 -> UserService.excluirPerguntaDoFormulario();
 
-                    case 5 -> {
-
-
-                    }
+                    case 5 -> UserService.pesquisarUsuario();
 
                     case 0 -> {
                         System.out.println("Saindo do programa...");

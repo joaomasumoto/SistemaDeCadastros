@@ -5,9 +5,7 @@ import entities.User;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class FileManager {
     private static final String DIRECTORY_PATH = "C:\\Users\\jgabr\\OneDrive\\Sticky Notes 8\\Imagens\\Documentos\\T.i\\projeto sistema de cadastro\\";
@@ -180,7 +178,6 @@ public class FileManager {
         }
 
 
-
         return questions;
     }
 
@@ -236,6 +233,74 @@ public class FileManager {
         } else {
             System.out.println("Pergunta " + questionNumber + " excluída com sucesso!");
         }
+    }
+
+    public static User readUserFromFile(File file) {
+        String name = null;
+        String email = null;
+        int age = 0;
+        double height = 0.0;
+        Map<String, String> extra = new LinkedHashMap<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+
+                if (line.toLowerCase().startsWith("nome:")) {
+                    name = line.substring(5).trim();
+                } else if (line.toLowerCase().startsWith("email:")) {
+                    email = line.substring(6).trim();
+                } else if (line.toLowerCase().startsWith("idade:")) {
+                    String num = line.replaceAll("[^0-9]", ""); //substitui "anos"
+                    age = Integer.parseInt(num);
+                } else if (line.toLowerCase().startsWith("altura:")) {
+                    String num = line.replaceAll("[^0-9.,]", "").replace(",", "."); //substitui "m" do final da linha
+                    height = Double.parseDouble(num);
+                } else if (!line.isBlank()) {
+                    // tudo que sobrar vira campo extra (Map)
+                    int i = line.indexOf('?');
+                    if (i != -1 && i < line.length() - 1) {
+                        String question = line.substring(0, i + 1).trim();
+                        String answer = line.substring(i + 1).trim();
+                        extra.put(question, answer);
+                    } else {
+                        extra.put(line, ""); // caso raro: pergunta sem resposta
+                    }
+                }
+            }
+
+
+        } catch (IOException e) {
+            System.err.println("Erro ao ler o arquivo: " + file.getName());
+        }
+
+        //Criar o objeto User
+        return new User(name, email, age, height, extra);
+    }
+
+    public static void searchUsers(String nameKey) {
+        List<File> users = listUserFiles();
+        boolean found = false;
+
+        System.out.println("\n--- Resultados da busca por: \"" + nameKey + "\" ---");
+
+        for (File f : users) {
+            User u = readUserFromFile(f);
+
+            if (u.getName().toLowerCase().contains(nameKey.toLowerCase())) {
+                System.out.println("\nArquivo: " + f.getName());
+                System.out.println("------------------------------");
+                System.out.println(u); // toString() do User
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Nenhum usuário encontrado com o termo: " + nameKey);
+        }
+
+        System.out.println("\n----------------------------------------\n");
     }
 
 }

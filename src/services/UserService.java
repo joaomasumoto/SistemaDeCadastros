@@ -165,7 +165,26 @@ public class UserService {
         }
 
         System.out.println("Operação concluída.\n");
+    }
 
+    public static void pesquisarUsuario() {
+
+            System.out.println("\n--- Pesquisa de usuários ---");
+            System.out.println("DIGITE 0 PARA RETORNAR AO MENU PRINCIPAL.");
+            System.out.print("Buscar: ");
+            String nameKey = sc.nextLine().trim();
+
+            if (nameKey.isBlank()) {
+                System.out.println("Digite algo para buscar.");
+                return;
+            }
+
+            if (nameKey.equals("0")) {
+                System.out.println("Retornando...");
+                return;
+            }
+
+            FileManager.searchUsers(nameKey);
     }
 
 }
