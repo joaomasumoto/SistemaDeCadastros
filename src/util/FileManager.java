@@ -279,16 +279,22 @@ public class FileManager {
         return new User(name, email, age, height, extra);
     }
 
-    public static void searchUsers(String nameKey) {
+    public static void searchUsers(String key) {
         List<File> users = listUserFiles();
         boolean found = false;
+        String termo = key.toLowerCase().trim();
 
-        System.out.println("\n--- Resultados da busca por: \"" + nameKey + "\" ---");
+        System.out.println("\n--- Resultados da busca por: \"" + key + "\" ---");
 
         for (File f : users) {
             User u = readUserFromFile(f);
 
-            if (u.getName().toLowerCase().contains(nameKey.toLowerCase())) {
+            if (u == null) continue;
+            String nome = u.getName() != null ? u.getName().toLowerCase() : "";
+            String email = u.getEmail() != null ? u.getEmail().toLowerCase() : "";
+            String idade = String.valueOf(u.getAge());
+
+            if (nome.contains(termo) || email.contains(termo) || idade.contains(termo)) {
                 System.out.println("\nArquivo: " + f.getName());
                 System.out.println("------------------------------");
                 System.out.println(u); // toString() do User
@@ -297,7 +303,7 @@ public class FileManager {
         }
 
         if (!found) {
-            System.out.println("Nenhum usuário encontrado com o termo: " + nameKey);
+            System.out.println("Nenhum usuário encontrado com o termo: " + key);
         }
 
         System.out.println("\n----------------------------------------\n");

@@ -170,7 +170,7 @@ public class UserService {
     public static void pesquisarUsuario() {
 
             System.out.println("\n--- Pesquisa de usuários ---");
-            System.out.println("DIGITE 0 PARA RETORNAR AO MENU PRINCIPAL.");
+            System.out.println("DIGITE \"0\" PARA RETORNAR AO MENU PRINCIPAL.");
             System.out.print("Buscar: ");
             String nameKey = sc.nextLine().trim();
 
