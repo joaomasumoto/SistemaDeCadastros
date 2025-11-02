@@ -159,4 +159,83 @@ public class FileManager {
 
     }
 
+    public static List listQuestions() {
+        List<String> questions = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(FORMS_FILE))) {
+            String line;
+            int index = 1;
+
+            System.out.println("Perguntas adicionais cadastradas:\n");
+
+            while ((line = reader.readLine()) != null) {
+                if (index > 4) {
+                    questions.add(line);
+                    System.out.println(line);
+                }
+                index++;
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao ler o formulário: " + e.getMessage());
+        }
+
+
+
+        return questions;
+    }
+
+    public static void deleteQuestion(int questionNumber) {
+        File inputFile = new File(FORMS_FILE);
+        File tempFile = new File(FORMS_FILE + "temp");
+
+        try (
+                BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))
+
+        ) {
+
+            String line;
+            int index = 1;
+
+            while ((line = reader.readLine()) != null) {
+                if (index <= 4) {
+                    writer.write(line);
+                    writer.newLine();
+                } else {
+
+                    String[] parts = line.split("-", 2);
+                    if (parts.length < 2) continue; //ignora se a linha estiver quebrada
+
+                    int currentNumber = Integer.parseInt(parts[0].trim());
+
+                    if (currentNumber == questionNumber) {
+                        index++;
+                        continue;
+                    }
+
+                    //Atualiza o numero
+                    if (currentNumber > questionNumber) {
+                        currentNumber--;
+                    }
+
+                    //Reescreve no formato "n - texto"
+                    writer.write(currentNumber + " -" + parts[1]);
+                    writer.newLine();
+                }
+                index++;
+            }
+
+        } catch (IOException e) {
+            System.err.println("Erro ao manipular o arquivo: " + e.getMessage());
+            return;
+        }
+
+        //Substitui o original pelo novo
+        if (!inputFile.delete() || !tempFile.renameTo(inputFile)) {
+            System.err.println("Não foi possível deletar o arquivo original!");
+        } else {
+            System.out.println("Pergunta " + questionNumber + " excluída com sucesso!");
+        }
+    }
+
 }

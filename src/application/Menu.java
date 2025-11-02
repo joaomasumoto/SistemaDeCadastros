@@ -33,10 +33,7 @@ public class Menu {
 
                     case 3 -> UserService.adicionarPergunta();
 
-                    case 4 -> {
-
-
-                    }
+                    case 4 -> UserService.excluirPerguntaDoFormulario();
 
                     case 5 -> {
 

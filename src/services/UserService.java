@@ -137,4 +137,35 @@ public class UserService {
         System.out.println("Pergunta adicionada com sucesso!");
     }
 
+    public static void excluirPerguntaDoFormulario() {
+        System.out.println("\n--- Excluir Pergunta do Formulário ---");
+        FileManager.listQuestions();
+        System.out.println("0 - Voltar ao menu principal.");
+
+        System.out.print("\nSelecione o número da pergunta que deseja excluir: ");
+
+        try {
+            int pergunta = sc.nextInt();
+            sc.nextLine();
+
+
+            if (pergunta == 0) {
+                System.out.println("Retornando...");
+                return;
+            }
+            if (pergunta <= 4) {
+                System.out.println("Não é permitido excluir as perguntas base.");
+                return;
+            }
+
+            FileManager.deleteQuestion(pergunta);
+        } catch (InputMismatchException e) {
+            System.out.println("Entrada inválida. Digite apenas números.");
+            sc.nextLine();
+        }
+
+        System.out.println("Operação concluída.\n");
+
+    }
+
 }
