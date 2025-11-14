@@ -138,11 +138,29 @@ public class UserService {
     }
 
     public static void excluirPerguntaDoFormulario() {
-        System.out.println("\n--- Excluir Pergunta do Formulário ---");
-        FileManager.listQuestions();
-        System.out.println("0 - Voltar ao menu principal.");
 
-        System.out.print("\nSelecione o número da pergunta que deseja excluir: ");
+        System.out.println("\n--- Excluir Pergunta do Formulário ---\n");
+
+        List<String> extras = FileManager.listQuestions();
+
+        if (extras.isEmpty()) {
+            System.out.println("\nNenhuma pergunta extra adicionada.\n");
+            System.out.println("Retornando ao menu...");
+            System.out.println();
+            return;
+        }
+
+        for (int i = 0; i < (extras.size())-4; i++) {
+            System.out.println(extras.get(i));
+        }
+
+
+        System.out.print("""
+                    
+                    -----------------------------------
+                    0 - Voltar ao menu principal.
+                    
+                    Selecione o número da pergunta que deseja excluir:\s""" );
 
         try {
             int pergunta = sc.nextInt();

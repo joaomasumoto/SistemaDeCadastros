@@ -148,28 +148,43 @@ public class FileManager {
 
     public static void addQuestion(String question) {
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FORMS_FILE, true))) {
-            bw.newLine();
-            bw.write((getQuestionCount() + 1) + " - " + Validator.formatQuestion(question));
+        question = question.trim();
+        if (question.isBlank()) {
+            throw new IllegalArgumentException("Pergunta não pode ser vazia.");
+        }
+
+        int index = getQuestionCount() + 1;
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(FORMS_FILE));
+
+            // remove linhas vazias fantasmas
+            while (!lines.isEmpty() && lines.get(lines.size() - 1).isBlank()) {
+                lines.remove(lines.size() - 1);
+            }
+
+            lines.add(index + " - " + question);
+
+            Files.write(Paths.get(FORMS_FILE), lines);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    public static List listQuestions() {
+    public static List<String> listQuestions() {
         List<String> questions = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(FORMS_FILE))) {
             String line;
             int index = 1;
 
-            System.out.println("Perguntas adicionais cadastradas:\n");
+            System.out.println("Perguntas adicionais cadastradas:");
 
             while ((line = reader.readLine()) != null) {
                 if (index > 4) {
                     questions.add(line);
-                    System.out.println(line);
+                    System.out.print("\n" + line);
                 }
                 index++;
             }
@@ -181,57 +196,63 @@ public class FileManager {
         return questions;
     }
 
+
     public static void deleteQuestion(int questionNumber) {
         File inputFile = new File(FORMS_FILE);
-        File tempFile = new File(FORMS_FILE + "temp");
 
-        try (
-                BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-                BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))
+        try {
+            List<String> lines = Files.readAllLines(inputFile.toPath());
+            List<String> cleaned = new ArrayList<>();
 
-        ) {
+            int questionIndex = 1;
 
-            String line;
-            int index = 1;
+            for (String line : lines) {
 
-            while ((line = reader.readLine()) != null) {
-                if (index <= 4) {
-                    writer.write(line);
-                    writer.newLine();
-                } else {
+                if (line == null || line.isBlank())
+                    continue; // remove linhas vazias no processo
 
-                    String[] parts = line.split("-", 2);
-                    if (parts.length < 2) continue; //ignora se a linha estiver quebrada
+                line = line.trim();
 
-                    int currentNumber = Integer.parseInt(parts[0].trim());
-
-                    if (currentNumber == questionNumber) {
-                        index++;
-                        continue;
-                    }
-
-                    //Atualiza o numero
-                    if (currentNumber > questionNumber) {
-                        currentNumber--;
-                    }
-
-                    //Reescreve no formato "n - texto"
-                    writer.write(currentNumber + " -" + parts[1]);
-                    writer.newLine();
+                // mantém as 4 perguntas base
+                if (questionIndex <= 4) {
+                    cleaned.add(line);
+                    questionIndex++;
+                    continue;
                 }
-                index++;
+
+                // quebra número + texto
+                String[] parts = line.split("-", 2);
+                if (parts.length < 2) {
+                    // ignorar lixo no arquivo
+                    questionIndex++;
+                    continue;
+                }
+
+                int currentNumber = Integer.parseInt(parts[0].trim());
+                String text = parts[1].trim();
+
+                // se for a pergunta excluída, simplesmente pula
+                if (currentNumber == questionNumber) {
+                    questionIndex++;
+                    continue;
+                }
+
+                // reindexa
+                if (currentNumber > questionNumber) {
+                    currentNumber--;
+                }
+
+                cleaned.add(currentNumber + " - " + text);
+                questionIndex++;
             }
 
-        } catch (IOException e) {
-            System.err.println("Erro ao manipular o arquivo: " + e.getMessage());
-            return;
-        }
+            // regrava o arquivo limpo
+            Files.write(inputFile.toPath(), cleaned);
 
-        //Substitui o original pelo novo
-        if (!inputFile.delete() || !tempFile.renameTo(inputFile)) {
-            System.err.println("Não foi possível deletar o arquivo original!");
-        } else {
             System.out.println("Pergunta " + questionNumber + " excluída com sucesso!");
+
+        } catch (Exception e) {
+            System.err.println("Erro ao manipular o arquivo: " + e.getMessage());
         }
     }
 
@@ -245,6 +266,7 @@ public class FileManager {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
                 line = line.trim();
 
                 if (line.toLowerCase().startsWith("nome:")) {
@@ -279,34 +301,45 @@ public class FileManager {
         return new User(name, email, age, height, extra);
     }
 
+    private static boolean matchesSearch(User u, String termo) {
+        String key = termo.toLowerCase();
+        String nome = u.getName() != null ? u.getName().toLowerCase() : "";
+        String email = u.getEmail() != null ? u.getEmail().toLowerCase() : "";
+        String idade = String.valueOf(u.getAge());
+
+        return nome.contains(key) || email.contains(key) || idade.contains(key);
+    }
+
     public static void searchUsers(String key) {
         List<File> users = listUserFiles();
-        boolean found = false;
-        String termo = key.toLowerCase().trim();
+        List<User> resultados = new ArrayList<>();
 
         System.out.println("\n--- Resultados da busca por: \"" + key + "\" ---");
 
         for (File f : users) {
             User u = readUserFromFile(f);
 
-            if (u == null) continue;
-            String nome = u.getName() != null ? u.getName().toLowerCase() : "";
-            String email = u.getEmail() != null ? u.getEmail().toLowerCase() : "";
-            String idade = String.valueOf(u.getAge());
-
-            if (nome.contains(termo) || email.contains(termo) || idade.contains(termo)) {
-                System.out.println("\nArquivo: " + f.getName());
-                System.out.println("------------------------------");
-                System.out.println(u); // toString() do User
-                found = true;
+            if (u != null && matchesSearch(u, key)) {
+                resultados.add(u);
             }
         }
 
-        if (!found) {
+        //Ordenação por nome
+        resultados.sort(Comparator.comparing(User::getName, String.CASE_INSENSITIVE_ORDER));
+
+        //Exibe resultados
+
+        if (resultados.isEmpty()) {
             System.out.println("Nenhum usuário encontrado com o termo: " + key);
+        } else {
+            System.out.println(resultados.size() + " usuário(s) encontrado(s):\n");
+            for (User u : resultados) {
+                System.out.println("------------------------------");
+                System.out.println(u); // toString() do User
+            }
         }
 
         System.out.println("\n----------------------------------------\n");
-    }
 
+    }
 }
